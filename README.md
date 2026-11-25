@@ -9,9 +9,6 @@
 A small Windows tray app that watches the **World of Warcraft Token** price and tells you
 in Discord when it's cheap enough to buy with gold.
 
-> **Status: in development.** There's no download yet. These instructions describe how
-> the app will work once the first release is published.
-
 ---
 
 ## 1. What it does
