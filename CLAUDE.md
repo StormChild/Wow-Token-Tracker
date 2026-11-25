@@ -83,8 +83,9 @@ go build -ldflags "-H windowsgui -s -w" -o WowTokenTracker.exe ./cmd/wowtokentra
 - Build with `-H windowsgui` (no console window).
 - Single instance via named mutex.
 - Tooltip text ≤127 chars.
-- Autostart = Scheduled Task, ONLOGON, "only when user is logged on" (otherwise no tray
-  icon). Tray menu has a **Start with Windows** toggle; README documents manual `schtasks`
+- Autostart = Scheduled Task with a per-user logon trigger, registered from XML (plain
+  `schtasks /SC ONLOGON` needs admin rights and fails for normal users), "only when user is logged on" (otherwise no tray
+  icon). Tray menu has a **Start with Windows** toggle; README documents manual PowerShell (`Register-ScheduledTask`)
   and Task Scheduler GUI steps too.
 - Exe is unsigned — README must explain the SmartScreen "More info → Run anyway" step.
 
@@ -107,7 +108,7 @@ what they should see after each step. Sections, in order (full detail in the des
 4. Discord webhook (Server Settings → Integrations → Webhooks).
 5. First run, the Settings page and the **Test** button.
 6. Start with Windows: the tray toggle **and** full manual Scheduled Task steps (the
-   `schtasks` command and Task Scheduler GUI), how to verify it, and how to remove it.
+   PowerShell `Register-ScheduledTask` lines and Task Scheduler GUI), how to verify it, and how to remove it.
 7. Using it.
 8. Troubleshooting.
 9. Uninstall: task, exe, the data folders and the Credential Manager entries.

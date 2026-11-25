@@ -149,20 +149,28 @@ Choose **one** of these options. Option A is the easiest.
 
 That's it. To turn it off, click it again.
 
-### Option B: one command
+### Option B: paste a few lines into PowerShell
 
-1. Press **Start**, type `cmd` and open **Command Prompt**. Make sure it's Command Prompt,
-   not PowerShell.
-2. Paste this line and press **Enter**:
+1. Press **Start**, type `PowerShell` and open **Windows PowerShell**. You don't need
+   "Run as administrator".
+2. Paste all of these lines and press **Enter**:
 
+   ```powershell
+   $exe       = "$env:LOCALAPPDATA\Programs\WowTokenTracker\WowTokenTracker.exe"
+   $action    = New-ScheduledTaskAction -Execute $exe
+   $trigger   = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+   $settings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0
+   $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
+   Register-ScheduledTask -TaskName "WowTokenTracker" -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force
    ```
-   schtasks /Create /TN "WowTokenTracker" /TR "\"%LOCALAPPDATA%\Programs\WowTokenTracker\WowTokenTracker.exe\"" /SC ONLOGON /RL LIMITED /F
-   ```
 
-   ✅ **You should see** `SUCCESS: The scheduled task "WowTokenTracker" has successfully been created.`
+   ✅ **You should see** a short table with `WowTokenTracker` and the state `Ready`.
 
-If you put the `.exe` somewhere other than the folder from step 2, change the path in the
-command to match.
+If you put the `.exe` somewhere other than the folder from step 2, change the path on the
+first line to match.
+
+> Why not a one-line `schtasks /SC ONLOGON` command? Without administrator rights, Windows
+> refuses it with "Access is denied". The lines above work for a normal user.
 
 ### Option C: Task Scheduler, step by step
 
@@ -199,7 +207,7 @@ command to match.
 
 Use whichever matches how you set it up:
 - **Option A:** right-click the tray dot and untick **Start with Windows**.
-- **Option B:** in Command Prompt, run `schtasks /Delete /TN "WowTokenTracker" /F`.
+- **Option B:** in PowerShell, run `Unregister-ScheduledTask -TaskName "WowTokenTracker" -Confirm:$false`.
 - **Option C:** in Task Scheduler, click **Task Scheduler Library**, right-click
   **WowTokenTracker**, then choose **Delete**.
 

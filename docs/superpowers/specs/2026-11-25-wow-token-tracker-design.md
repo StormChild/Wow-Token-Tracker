@@ -129,7 +129,7 @@ A Windows tray app — a "red/green robot":
 - Menu: **Check now**, **Settings…**, **Start with Windows** (toggle), **Open log folder**,
   **Exit**.
 - *Call:* **Start with Windows** creates/removes the Scheduled Task for the user (via
-  `schtasks`), so a friend doesn't need the command line. The README still documents the
+  `schtasks /XML` with a per-user logon trigger — plain `/SC ONLOGON` needs admin), so a friend doesn't need the command line. The README still documents the
   manual steps.
 - Single instance via a named mutex.
 
@@ -184,7 +184,7 @@ button/field names, and what they should see after each step.
    client ID, secret, webhook, threshold; press **Test**; expect a test message in
    Discord and the icon turning green/red.
 6. **Start with Windows** — option A: tray menu → **Start with Windows**. Option B
-   (manual): exact `schtasks /Create …` command to paste into a terminal, and full Task
+   (manual): PowerShell `Register-ScheduledTask` lines to paste (no admin needed), and full Task
    Scheduler GUI steps (Create Task → General: "Run only when user is logged on" → Triggers:
    At log on → Actions: start the `.exe` → Conditions: untick "Start only if on AC power"
    → Settings: untick "Stop the task if it runs longer than…"). How to check it works
