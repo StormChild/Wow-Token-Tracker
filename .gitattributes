@@ -1,0 +1,7 @@
+# Keep LF everywhere, including Windows checkouts (CI runner and core.autocrlf=true),
+# so gofmt sees canonical line endings.
+* text=auto eol=lf
+
+*.exe binary
+*.png binary
+*.ico binary
