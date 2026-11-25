@@ -33,7 +33,7 @@
 
   <label for="region">Region</label>
   <select id="region" name="region">
-    {{range .Regions}}<option value="{{.}}"{{if eq . $.S.Region}} selected{{end}}>{{.}}</option>{{end}}
+    {{range .Regions}}<option value="{{.}}"{{if eq . $.S.Region}} selected{{end}}>{{upper .}}</option>{{end}}
   </select>
 
   <label for="clientId">Client ID <span class="hint">— from develop.battle.net</span></label>

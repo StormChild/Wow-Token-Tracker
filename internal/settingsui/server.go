@@ -29,7 +29,7 @@ type Callbacks struct {
 //go:embed page.html
 var pageHTML string
 
-var page = template.Must(template.New("page").Parse(pageHTML))
+var page = template.Must(template.New("page").Funcs(template.FuncMap{"upper": strings.ToUpper}).Parse(pageHTML))
 
 type view struct {
 	S          config.Settings

@@ -156,3 +156,11 @@ func TestTestButtonShowsError(t *testing.T) {
 		t.Fatalf("body %s", w.Body)
 	}
 }
+
+func TestRegionsShownUppercase(t *testing.T) {
+	w := do(t, NewHandler("tok", (&rec{}).callbacks()), "GET", "/?t=tok", nil, local)
+	body := w.Body.String()
+	if !strings.Contains(body, `<option value="us" selected>US</option>`) || !strings.Contains(body, `>TW</option>`) {
+		t.Fatalf("region options not uppercase: %s", body)
+	}
+}
