@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/StormChild/Wow-Token-Tracker/internal/config"
@@ -44,6 +45,12 @@ type view struct {
 type handler struct {
 	token string
 	cb    Callbacks
+
+	// Secrets typed but not yet saved (after a Test or a failed Save). The page never echoes
+	// secrets, so the browser re-submits those fields blank; these fill them in until a Save succeeds.
+	mu             sync.Mutex
+	pendingSecret  string
+	pendingWebhook string
 }
 
 // NewHandler serves the settings page; every request must carry token and a loopback Host.
@@ -79,9 +86,13 @@ func (h *handler) guard(next http.Handler) http.Handler {
 
 func (h *handler) render(w http.ResponseWriter, s config.Settings, msg string, isErr bool) {
 	stored := h.cb.Load()
+	h.mu.Lock()
+	hasSecret := stored.ClientSecret != "" || h.pendingSecret != ""
+	hasWebhook := stored.WebhookURL != "" || h.pendingWebhook != ""
+	h.mu.Unlock()
 	v := view{
 		S: s, Regions: config.Regions, Token: h.token,
-		HasSecret: stored.ClientSecret != "", HasWebhook: stored.WebhookURL != "",
+		HasSecret: hasSecret, HasWebhook: hasWebhook,
 		Msg: msg, IsErr: isErr,
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -94,17 +105,26 @@ func (h *handler) get(w http.ResponseWriter, r *http.Request) {
 	h.render(w, h.cb.Load(), "", false)
 }
 
-// merge reads the form over the stored settings; blank secret fields keep the stored value.
+// merge reads the form over the stored settings. A blank secret field keeps the value typed
+// earlier in this session, else the stored one. Typed secrets are remembered until a Save succeeds.
 func (h *handler) merge(r *http.Request) (config.Settings, error) {
 	s := h.cb.Load()
 	s.Region = strings.TrimSpace(r.PostFormValue("region"))
 	s.ClientID = strings.TrimSpace(r.PostFormValue("clientId"))
+	h.mu.Lock()
 	if v := strings.TrimSpace(r.PostFormValue("clientSecret")); v != "" {
-		s.ClientSecret = v
+		h.pendingSecret = v
 	}
 	if v := strings.TrimSpace(r.PostFormValue("webhookUrl")); v != "" {
-		s.WebhookURL = v
+		h.pendingWebhook = v
 	}
+	if h.pendingSecret != "" {
+		s.ClientSecret = h.pendingSecret
+	}
+	if h.pendingWebhook != "" {
+		s.WebhookURL = h.pendingWebhook
+	}
+	h.mu.Unlock()
 	var errs []error
 	th, err := parseWhole(r.PostFormValue("thresholdGold"))
 	if err != nil {
@@ -133,6 +153,9 @@ func (h *handler) save(w http.ResponseWriter, r *http.Request) {
 		h.render(w, s, err.Error(), true)
 		return
 	}
+	h.mu.Lock()
+	h.pendingSecret, h.pendingWebhook = "", ""
+	h.mu.Unlock()
 	h.render(w, s, "Saved ✓ — the tray icon will update in a few seconds.", false)
 }
 

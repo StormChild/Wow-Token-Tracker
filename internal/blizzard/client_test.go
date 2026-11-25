@@ -134,3 +134,17 @@ func TestPersistent401IsBadCredentials(t *testing.T) {
 		t.Fatalf("err = %v, want ErrBadCredentials", err)
 	}
 }
+
+func TestUnreachableIsPlainEnglish(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	c := New("id", "secret")
+	c.OAuthURL = srv.URL + "/token"
+	srv.Close()
+	_, err := c.TokenPrice(context.Background(), "us")
+	if err == nil || err.Error() != "can't reach Blizzard — check your internet connection" {
+		t.Fatalf("err = %v", err)
+	}
+	if errors.Unwrap(err) == nil {
+		t.Fatal("underlying network error not kept for the log")
+	}
+}

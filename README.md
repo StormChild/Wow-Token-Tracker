@@ -241,7 +241,7 @@ those boxes blank to keep what's saved, or type a new value to replace it.
 | Grey dot, and the tooltip says **"Blizzard rejected the client ID or secret"** | Open **Settings…** and paste the Client ID and Client Secret again from develop.battle.net. Watch for extra spaces. |
 | Grey dot, and the tooltip says **"data stale"** | Blizzard hasn't updated the price for over 2 hours. It usually fixes itself. Just wait. |
 | Grey dot, and the tooltip says **"not configured"** | Open **Settings…** and fill in every field. |
-| Grey dot with a network error | Check your internet connection. The app retries at the next check. |
+| Grey dot, and the tooltip says **"can't reach Blizzard — check your internet connection"** | Normal for a moment after logging in or waking the PC. The app retries after 1, 2, then every 5 minutes until it works. If it stays grey, check your internet connection. |
 | **Test** works, but no alerts come later | That's normal while the price stays on the same side of your threshold. Messages only come when it crosses. |
 | No Discord message at all, even on **Test** | The webhook may have been deleted. Create a new one (step 4), paste it into Settings and click **Test**. |
 | Can't find the tray dot | Click the **^** arrow by the clock. See the tip at the end of step 5. |

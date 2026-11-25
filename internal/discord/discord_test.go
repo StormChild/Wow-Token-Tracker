@@ -137,3 +137,13 @@ func TestUnreachableDoesNotLeakWebhook(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+func TestUnreachableIsPlainEnglish(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	url := srv.URL + "/api/webhooks/1/x"
+	srv.Close()
+	err := Send(context.Background(), http.DefaultClient, url, alert(tracker.Green))
+	if err == nil || err.Error() != "can't reach Discord — check your internet connection" {
+		t.Fatalf("err = %v", err)
+	}
+}

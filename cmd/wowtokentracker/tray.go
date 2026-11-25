@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os/exec"
@@ -143,22 +144,28 @@ func (t *tray) triggerCheck() {
 	}
 }
 
-// loop checks now, then whenever PollMinutes of wall-clock time have passed (robust to sleep/resume)
-// or a recheck is requested.
+// loop checks now, then whenever the wait from app.NextWait has passed in wall-clock time
+// (robust to sleep/resume), or a recheck is requested. After a failure it retries sooner.
 func (t *tray) loop() {
 	tick := time.NewTicker(time.Minute)
 	defer tick.Stop()
 	var last time.Time
 	var lastErr string
+	failures := 0
 	for {
 		st := t.app.Check(t.ctx)
 		last = time.Now()
 		s := t.current()
 		systray.SetIcon(assets.Icon(st.Display))
 		systray.SetTooltip(app.Tooltip(s.Region, s.ThresholdGold, st))
+		if app.Retryable(st) {
+			failures++
+		} else {
+			failures = 0
+		}
 		if e := errString(st.Err); e != lastErr {
 			if e != "" {
-				slog.Warn("check failed", "err", e)
+				slog.Warn("check failed", "err", e, "cause", errors.Unwrap(st.Err))
 			} else {
 				slog.Info("check ok again")
 			}
@@ -173,7 +180,8 @@ func (t *tray) loop() {
 			case <-t.recheck:
 				break wait
 			case <-tick.C:
-				if time.Since(last.Round(0)) >= time.Duration(t.current().PollMinutes)*time.Minute {
+				poll := time.Duration(t.current().PollMinutes) * time.Minute
+				if time.Since(last.Round(0)) >= app.NextWait(failures, poll) {
 					break wait
 				}
 			}

@@ -164,3 +164,41 @@ func TestRegionsShownUppercase(t *testing.T) {
 		t.Fatalf("region options not uppercase: %s", body)
 	}
 }
+
+// store is a stateful Load/Save pair that starts empty, like a first run.
+type store struct{ s config.Settings }
+
+func (st *store) callbacks() Callbacks {
+	st.s = config.Defaults()
+	return Callbacks{
+		Load: func() config.Settings { return st.s },
+		Save: func(s config.Settings) error { st.s = s; return nil },
+		Test: func(context.Context, config.Settings) (int64, error) { return 395120, nil },
+	}
+}
+
+func TestTestThenSaveOnEmptyStoreKeepsTypedSecrets(t *testing.T) {
+	st := &store{}
+	h := NewHandler("tok", st.callbacks())
+	w := do(t, h, "POST", "/test", formWith("tok", "clientSecret", "S3CRET", "webhookUrl", hook), local)
+	if strings.Contains(w.Body.String(), "S3CRET") || strings.Contains(w.Body.String(), "webhooks/1/abc") {
+		t.Fatal("secrets echoed after Test")
+	}
+	if !strings.Contains(w.Body.String(), "leave blank to keep") {
+		t.Fatal("after Test the secret fields don't say they'll be kept")
+	}
+	do(t, h, "POST", "/save", formWith("tok"), local) // browser re-submits blank password fields
+	if st.s.ClientSecret != "S3CRET" || st.s.WebhookURL != hook {
+		t.Fatalf("typed secrets lost: %+v", st.s)
+	}
+}
+
+func TestFailedSaveKeepsTypedSecrets(t *testing.T) {
+	st := &store{}
+	h := NewHandler("tok", st.callbacks())
+	do(t, h, "POST", "/save", formWith("tok", "clientSecret", "S3CRET", "webhookUrl", hook, "thresholdGold", "lots"), local)
+	do(t, h, "POST", "/save", formWith("tok"), local)
+	if st.s.ClientSecret != "S3CRET" || st.s.WebhookURL != hook {
+		t.Fatalf("typed secrets lost after failed save: %+v", st.s)
+	}
+}

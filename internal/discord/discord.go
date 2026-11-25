@@ -81,7 +81,7 @@ func Send(ctx context.Context, httpc *http.Client, webhookURL string, a Alert) e
 		if errors.As(err, &ue) {
 			err = ue.Err
 		}
-		return fmt.Errorf("can't reach Discord: %v", err)
+		return unreachable{err}
 	}
 	defer resp.Body.Close()
 	switch {
@@ -95,3 +95,10 @@ func Send(ctx context.Context, httpc *http.Client, webhookURL string, a Alert) e
 		return fmt.Errorf("Discord returned %d", resp.StatusCode)
 	}
 }
+
+// unreachable is a network failure; Error is plain English for the tooltip, Unwrap keeps detail
+// for the log. The wrapped error never contains the webhook URL (url.Error is stripped above).
+type unreachable struct{ err error }
+
+func (e unreachable) Error() string { return "can't reach Discord — check your internet connection" }
+func (e unreachable) Unwrap() error { return e.err }

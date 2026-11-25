@@ -70,7 +70,7 @@ func (c *Client) fetchPrice(ctx context.Context, region string, forceRefresh boo
 	req.Header.Set("Authorization", "Bearer "+tok)
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
-		return tracker.Observation{}, fmt.Errorf("can't reach Blizzard: %w", err)
+		return tracker.Observation{}, unreachable{err}
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusUnauthorized {
@@ -107,7 +107,7 @@ func (c *Client) accessToken(ctx context.Context, forceRefresh bool) (string, er
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("can't reach Blizzard: %w", err)
+		return "", unreachable{err}
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
@@ -127,3 +127,9 @@ func (c *Client) accessToken(ctx context.Context, forceRefresh bool) (string, er
 	c.expires = time.Now().Add(time.Duration(body.ExpiresIn) * time.Second)
 	return c.token, nil
 }
+
+// unreachable is a network failure; Error is plain English for the tooltip, Unwrap keeps detail for the log.
+type unreachable struct{ err error }
+
+func (e unreachable) Error() string { return "can't reach Blizzard — check your internet connection" }
+func (e unreachable) Unwrap() error { return e.err }
