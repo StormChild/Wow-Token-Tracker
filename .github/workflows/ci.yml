@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check formatting
+        shell: bash
+        run: test -z "$(gofmt -l .)" || { gofmt -l .; echo "run gofmt -w ."; exit 1; }
+      - run: go vet ./...
+      - run: go test ./...
+      - name: Build exe
+        run: go build -ldflags "-H windowsgui -s -w" -o WowTokenTracker.exe ./cmd/wowtokentracker

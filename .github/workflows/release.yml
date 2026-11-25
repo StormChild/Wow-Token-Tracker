@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test ./...
+      - name: Build exe
+        run: go build -ldflags "-H windowsgui -s -w -X main.version=${{ github.ref_name }}" -o WowTokenTracker.exe ./cmd/wowtokentracker
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" WowTokenTracker.exe --title "${{ github.ref_name }}" --generate-notes
