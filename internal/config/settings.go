@@ -23,7 +23,7 @@ type Settings struct {
 var Regions = []string{"us", "eu", "kr", "tw"}
 
 const (
-	DefaultRegion    = "us"
+	DefaultRegion    = "eu"
 	DefaultThreshold = 400000
 	DefaultPoll      = 20
 	MinPoll          = 5

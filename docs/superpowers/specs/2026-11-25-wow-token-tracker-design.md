@@ -95,7 +95,7 @@ A Windows tray app — a "red/green robot":
 ### Settings (*call*)
 
 - Non-secret settings in `%APPDATA%\WowTokenTracker\settings.json`:
-  `region` (us/eu/kr/tw, default us), `clientId`, `thresholdGold` (default 400000),
+  `region` (eu/us/kr/tw, default eu), `clientId`, `thresholdGold` (default 400000),
   `pollMinutes` (default 20, minimum 5).
 - `clientSecret` and `webhookUrl` stored in **Windows Credential Manager** (current user).
   A webhook URL is itself a secret — anyone with it can post to the channel.

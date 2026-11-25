@@ -19,7 +19,7 @@ func TestLoadMissingReturnsDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if s.Region != "us" || s.ThresholdGold != 400000 || s.PollMinutes != 20 {
+	if s.Region != "eu" || s.ThresholdGold != 400000 || s.PollMinutes != 20 {
 		t.Fatalf("defaults wrong: %+v", s)
 	}
 }
@@ -78,15 +78,15 @@ func TestLoadClampsPoll(t *testing.T) {
 	}
 }
 
-func TestLoadUnknownRegionFallsBackToUS(t *testing.T) {
+func TestLoadUnknownRegionFallsBackToEU(t *testing.T) {
 	st := newStore(t)
 	writeRaw(t, st, `{"region":"cn","thresholdGold":400000,"pollMinutes":20}`)
 	s, err := st.Load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if s.Region != "us" {
-		t.Fatalf("region = %q, want us", s.Region)
+	if s.Region != "eu" {
+		t.Fatalf("region = %q, want eu", s.Region)
 	}
 }
 

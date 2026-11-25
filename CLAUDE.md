@@ -57,7 +57,7 @@ go build -ldflags "-H windowsgui -s -w" -o WowTokenTracker.exe ./cmd/wowtokentra
 
 ## Config & secrets
 
-- `%APPDATA%\WowTokenTracker\settings.json`: `region` (us/eu/kr/tw, default us), `clientId`,
+- `%APPDATA%\WowTokenTracker\settings.json`: `region` (eu/us/kr/tw, default eu), `clientId`,
   `thresholdGold` (default 400000), `pollMinutes` (default 20, min 5).
 - `clientSecret` and `webhookUrl` live in Windows Credential Manager, never in the JSON.
   Treat the webhook URL as a secret.

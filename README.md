@@ -30,7 +30,7 @@ It posts a message to your Discord channel **only when the colour flips** betwee
 and red. You won't get a message every 20 minutes, and you won't get messages about errors.
 
 Hover over the icon to see the latest price, for example:
-`WoW Token (US): 395,120g · under 400,000g · checked 14:05`.
+`WoW Token (EU): 395,120g · under 400,000g · checked 14:05`.
 
 You'll need:
 - A Windows 10 or 11 PC.
@@ -74,7 +74,10 @@ The app uses your own free Blizzard API key to read the token price.
 2. Accept the API terms if you're asked to.
 3. Click **API Access** (or **Clients**), then **Create Client**.
 4. Fill in the form:
-   - **Client Name:** anything you like, e.g. `WoW Token Tracker`.
+   - **Client Name:** a name **nobody else will have used**, e.g. your Battle.net name
+     plus something random: `YourName-TokenTracker-2611`. Client names must be unique
+     across *all* Blizzard developers, and a common name like `WoW Token Tracker` is
+     already taken (see the warning below).
    - **Redirect URLs:** `http://localhost`
    - **Service URL:** tick **"I do not have a service URL for this client"** if that
      option is shown. Otherwise leave it blank.
@@ -82,6 +85,15 @@ The app uses your own free Blizzard API key to read the token price.
 5. Click **Save** or **Create**.
 6. You'll now see a **Client ID** and a **Client Secret**. Copy both into a temporary
    note. You'll paste them into the app in step 5.
+
+> ⚠️ **Got "500 Internal Server Error" when creating the client?** That almost always
+> means the **Client Name is already taken**. Blizzard's site shows an error page instead
+> of saying so. Go back, pick a more unusual name, and try again. If it still fails with
+> a unique name, Blizzard's developer site may be having problems. Try again later, or in
+> a private browser window with ad blockers turned off.
+
+The same client works for every region (EU, US, KR, TW). You pick your region in the
+app, not here.
 
 > 🔒 **Keep the Client Secret private.** Don't post it in Discord or share screenshots
 > of it. If it leaks, open the client on develop.battle.net and generate a new secret.
@@ -115,7 +127,7 @@ A webhook is a private link that lets the app post into one Discord channel.
 
    | Field | What to enter |
    |-------|---------------|
-   | **Region** | The region you play on: US, EU, KR or TW. |
+   | **Region** | The region you play on: EU (the default), US, KR or TW. |
    | **Client ID** | From step 3. |
    | **Client Secret** | From step 3. |
    | **Discord Webhook URL** | From step 4. |

@@ -148,3 +148,28 @@ func TestUnreachableIsPlainEnglish(t *testing.T) {
 		t.Fatal("underlying network error not kept for the log")
 	}
 }
+
+func TestEURegionUsesEUHostAndNamespace(t *testing.T) {
+	var namespace string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/token" {
+			fmt.Fprint(w, `{"access_token":"abc","expires_in":86399}`)
+			return
+		}
+		namespace = r.URL.Query().Get("namespace")
+		fmt.Fprint(w, `{"last_updated_timestamp":1764072000000,"price":3100000000}`)
+	}))
+	t.Cleanup(srv.Close)
+	c := New("id", "secret")
+	c.OAuthURL = srv.URL + "/token"
+	c.APIBaseFmt = srv.URL + "%.0s"
+	if _, err := c.TokenPrice(context.Background(), "eu"); err != nil {
+		t.Fatal(err)
+	}
+	if namespace != "dynamic-eu" {
+		t.Fatalf("namespace = %q, want dynamic-eu", namespace)
+	}
+	if got := fmt.Sprintf(New("", "").APIBaseFmt, "eu"); got != "https://eu.api.blizzard.com" {
+		t.Fatalf("EU base URL = %q", got)
+	}
+}

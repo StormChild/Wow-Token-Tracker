@@ -83,7 +83,7 @@ func TestFirstRunNotifiesOnce(t *testing.T) {
 		t.Fatalf("status = %+v", s)
 	}
 	a := h.sent[0]
-	if a.PriceGold != 395120 || a.ThresholdGold != 400000 || a.Region != "us" || a.Test {
+	if a.PriceGold != 395120 || a.ThresholdGold != 400000 || a.Region != "eu" || a.Test {
 		t.Fatalf("alert = %+v", a)
 	}
 }
@@ -130,7 +130,7 @@ func TestNotifyFailureRetries(t *testing.T) {
 		t.Fatalf("status = %+v", s)
 	}
 	st, _ := config.LoadState(h.app.StatePath)
-	if st[tracker.StateKey("us", hookA)] != tracker.Green {
+	if st[tracker.StateKey("eu", hookA)] != tracker.Green {
 		t.Fatal("state advanced despite failed post")
 	}
 	h.check(t)
